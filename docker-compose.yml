@@ -1,0 +1,28 @@
+# ═══════════════════════════════════════════
+# Nexo CRM — Docker Compose
+# Dev environment with Appwrite
+# ═══════════════════════════════════════════
+
+services:
+  nexo-crm:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_APPWRITE_ENDPOINT: ${NEXT_PUBLIC_APPWRITE_ENDPOINT}
+        NEXT_PUBLIC_APPWRITE_PROJECT: ${NEXT_PUBLIC_APPWRITE_PROJECT}
+        NEXT_PUBLIC_APPWRITE_DATABASE: ${NEXT_PUBLIC_APPWRITE_DATABASE}
+        NEXT_PUBLIC_APP_URL: ${NEXT_PUBLIC_APP_URL}
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env.local
+    environment:
+      - NODE_ENV=production
+    restart: unless-stopped
+    networks:
+      - nexo-network
+
+networks:
+  nexo-network:
+    driver: bridge
