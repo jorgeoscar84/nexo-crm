@@ -1,12 +1,20 @@
 "use server";
 
 import { ID, OAuthProvider } from "node-appwrite";
-import { createAdminClient, createSessionClient } from "@/lib/appwrite/server";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
-import { appwriteConfig } from "@/lib/appwrite/config";
+import { isDemoMode, DEMO_USER } from "@/lib/demo-mode";
 
 const SESSION_COOKIE = "nexo-session";
+
+// Only import Appwrite when NOT in demo mode (lazy)
+async function getAppwriteClients() {
+    const { createAdminClient, createSessionClient } = await import(
+        "@/lib/appwrite/server"
+    );
+    const { appwriteConfig } = await import("@/lib/appwrite/config");
+    return { createAdminClient, createSessionClient, appwriteConfig };
+}
 
 // ─── Get current session ────────────────
 export async function getSession() {
@@ -19,12 +27,19 @@ export async function getSession() {
 export async function getCurrentUser() {
     try {
         const session = await getSession();
+
+        // Demo mode: if session cookie exists, return demo user
+        if (isDemoMode()) {
+            return session ? DEMO_USER : null;
+        }
+
         if (!session) return null;
 
+        const { createSessionClient, appwriteConfig } =
+            await getAppwriteClients();
         const { account, databases } = createSessionClient(session);
         const user = await account.get();
 
-        // Try to get extended user profile
         try {
             const profile = await databases.getDocument(
                 appwriteConfig.databaseId,
@@ -33,7 +48,6 @@ export async function getCurrentUser() {
             );
             return { ...user, ...profile };
         } catch {
-            // Profile doesn't exist yet, return basic user
             return user;
         }
     } catch {
@@ -47,17 +61,27 @@ export async function registerWithEmail(formData: {
     email: string;
     password: string;
 }) {
+    // Demo mode: simulate registration
+    if (isDemoMode()) {
+        const cookieStore = await cookies();
+        cookieStore.set(SESSION_COOKIE, "demo_session_token", {
+            path: "/",
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production",
+            expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 days
+        });
+        return;
+    }
+
     const { name, email, password } = formData;
+    const { createAdminClient, createSessionClient } =
+        await getAppwriteClients();
 
     const { account } = createAdminClient();
-
-    // Create user account
     await account.create(ID.unique(), email, password, name);
-
-    // Create session
     const session = await account.createEmailPasswordSession(email, password);
 
-    // Set session cookie
     const cookieStore = await cookies();
     cookieStore.set(SESSION_COOKIE, session.secret, {
         path: "/",
@@ -67,7 +91,6 @@ export async function registerWithEmail(formData: {
         expires: new Date(session.expire),
     });
 
-    // Send verification email
     const { account: userAccount } = createSessionClient(session.secret);
     await userAccount.createVerification(
         `${process.env.NEXT_PUBLIC_APP_URL}/verify-email`
@@ -79,7 +102,21 @@ export async function loginWithEmail(formData: {
     email: string;
     password: string;
 }) {
+    // Demo mode: simulate login
+    if (isDemoMode()) {
+        const cookieStore = await cookies();
+        cookieStore.set(SESSION_COOKIE, "demo_session_token", {
+            path: "/",
+            httpOnly: true,
+            sameSite: "strict",
+            secure: process.env.NODE_ENV === "production",
+            expires: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+        });
+        return;
+    }
+
     const { email, password } = formData;
+    const { createAdminClient } = await getAppwriteClients();
 
     const { account } = createAdminClient();
     const session = await account.createEmailPasswordSession(email, password);
@@ -96,6 +133,12 @@ export async function loginWithEmail(formData: {
 
 // ─── Login with Google OAuth ────────────
 export async function loginWithGoogle() {
+    if (isDemoMode()) {
+        // In demo mode, just redirect to dashboard
+        redirect("/dashboard");
+    }
+
+    const { createAdminClient } = await getAppwriteClients();
     const { account } = createAdminClient();
 
     const redirectUrl = await account.createOAuth2Token(
@@ -109,6 +152,9 @@ export async function loginWithGoogle() {
 
 // ─── Handle OAuth callback ──────────────
 export async function handleOAuthCallback(userId: string, secret: string) {
+    if (isDemoMode()) return;
+
+    const { createAdminClient } = await getAppwriteClients();
     const { account } = createAdminClient();
     const session = await account.createSession(userId, secret);
 
@@ -125,13 +171,15 @@ export async function handleOAuthCallback(userId: string, secret: string) {
 // ─── Logout ─────────────────────────────
 export async function logout() {
     const session = await getSession();
-    if (!session) return;
 
-    try {
-        const { account } = createSessionClient(session);
-        await account.deleteSession("current");
-    } catch {
-        // Session might already be expired
+    if (!isDemoMode() && session) {
+        try {
+            const { createSessionClient } = await getAppwriteClients();
+            const { account } = createSessionClient(session);
+            await account.deleteSession("current");
+        } catch {
+            // Session might already be expired
+        }
     }
 
     const cookieStore = await cookies();
@@ -140,6 +188,9 @@ export async function logout() {
 
 // ─── Forgot Password ────────────────────
 export async function forgotPassword(email: string) {
+    if (isDemoMode()) return; // Noop in demo
+
+    const { createAdminClient } = await getAppwriteClients();
     const { account } = createAdminClient();
     await account.createRecovery(
         email,
@@ -153,21 +204,30 @@ export async function resetPassword(
     secret: string,
     newPassword: string
 ) {
+    if (isDemoMode()) return;
+
+    const { createAdminClient } = await getAppwriteClients();
     const { account } = createAdminClient();
     await account.updateRecovery(userId, secret, newPassword);
 }
 
 // ─── Verify Email ───────────────────────
 export async function verifyEmail(userId: string, secret: string) {
+    if (isDemoMode()) return;
+
+    const { createAdminClient } = await getAppwriteClients();
     const { account } = createAdminClient();
     await account.updateVerification(userId, secret);
 }
 
 // ─── Resend Verification ────────────────
 export async function resendVerification() {
+    if (isDemoMode()) return;
+
     const session = await getSession();
     if (!session) throw new Error("No session");
 
+    const { createSessionClient } = await getAppwriteClients();
     const { account } = createSessionClient(session);
     await account.createVerification(
         `${process.env.NEXT_PUBLIC_APP_URL}/verify-email`
