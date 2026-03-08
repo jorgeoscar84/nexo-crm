@@ -165,10 +165,10 @@
 /* ─── Custom Nexo Utilities ──────────────── */
 @layer utilities {
   .nexo-gradient {
-    background: linear-gradient(135deg, var(--color-nexo-indigo), var(--color-nexo-violet));
+    background-image: linear-gradient(135deg, var(--color-nexo-indigo), var(--color-nexo-violet));
   }
   .nexo-gradient-coral {
-    background: linear-gradient(135deg, var(--color-nexo-coral), var(--color-nexo-amber));
+    background-image: linear-gradient(135deg, var(--color-nexo-coral), var(--color-nexo-amber));
   }
   .nexo-glass {
     backdrop-filter: blur(12px) saturate(180%);

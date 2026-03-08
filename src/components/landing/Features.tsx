@@ -76,8 +76,12 @@ const cardVariants = {
 
 export function Features() {
     return (
-        <section id="features" className="py-20 sm:py-28">
-            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+        <section id="features" className="py-20 sm:py-28 relative overflow-hidden">
+            {/* Background gradient for depth */}
+            <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.02] to-transparent -z-10" />
+
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 relative">
                 {/* Header */}
                 <motion.div
                     className="mx-auto max-w-2xl text-center"
@@ -89,13 +93,13 @@ export function Features() {
                     <span className="text-sm font-semibold text-primary uppercase tracking-wider">
                         Funcionalidades
                     </span>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+                    <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight sm:text-4xl">
                         Todo lo que necesitas para{" "}
                         <span className="nexo-gradient bg-clip-text text-transparent">
                             vender y liderar
                         </span>
                     </h2>
-                    <p className="mt-4 text-lg text-muted-foreground">
+                    <p className="mt-4 text-balance text-lg text-muted-foreground">
                         Un solo lugar para tu pipeline de ventas, comunicación con clientes
                         y gestión de tu equipo de red.
                     </p>
@@ -110,9 +114,10 @@ export function Features() {
                     viewport={{ once: true, margin: "-100px" }}
                 >
                     {features.map((feature) => (
-                        <motion.div key={feature.title} variants={cardVariants}>
-                            <Card className="group h-full border transition-all duration-300 hover:shadow-lg hover:shadow-primary/5 hover:-translate-y-1">
-                                <CardContent className="p-6">
+                        <motion.div key={feature.title} variants={cardVariants} className="group/card">
+                            <Card className="group h-full border border-border/50 bg-card/50 backdrop-blur-sm transition-all duration-300 hover:shadow-xl hover:shadow-primary/5 hover:-translate-y-1 hover:border-border relative overflow-hidden">
+                                <div className="absolute inset-0 bg-gradient-to-br from-white/5 to-transparent opacity-0 transition-opacity duration-300 group-hover/card:opacity-100" />
+                                <CardContent className="p-6 relative z-10">
                                     <div
                                         className={`flex h-12 w-12 items-center justify-center rounded-xl ${feature.bg} transition-transform group-hover:scale-110`}
                                     >

@@ -9,9 +9,9 @@ export function Hero() {
     return (
         <section className="relative overflow-hidden py-20 sm:py-32">
             {/* Background decorations */}
-            <div className="pointer-events-none absolute inset-0 -z-10">
-                <div className="absolute -top-40 right-0 h-[500px] w-[500px] rounded-full bg-primary/5 blur-3xl" />
-                <div className="absolute -bottom-20 -left-20 h-[400px] w-[400px] rounded-full bg-accent/10 blur-3xl" />
+            <div className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center">
+                <div className="absolute top-0 right-1/4 h-[600px] w-[600px] -translate-y-1/2 rounded-full bg-primary/10 blur-[100px]" />
+                <div className="absolute bottom-0 left-1/4 h-[500px] w-[500px] translate-y-1/3 rounded-full bg-accent/15 blur-[100px]" />
             </div>
 
             <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
@@ -30,7 +30,7 @@ export function Hero() {
 
                     {/* Headline */}
                     <motion.h1
-                        className="mt-6 text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl"
+                        className="mt-6 text-balance text-4xl font-bold tracking-tight sm:text-5xl lg:text-6xl lg:leading-[1.1]"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.1 }}
@@ -46,7 +46,7 @@ export function Hero() {
 
                     {/* Subtitle */}
                     <motion.p
-                        className="mt-6 text-lg text-muted-foreground sm:text-xl"
+                        className="mt-6 text-balance text-lg text-muted-foreground sm:text-xl"
                         initial={{ opacity: 0, y: 20 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.2 }}
@@ -63,13 +63,13 @@ export function Hero() {
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.5, delay: 0.3 }}
                     >
-                        <Button size="lg" className="text-base px-8" asChild>
+                        <Button size="lg" className="text-base px-8 shadow-lg shadow-primary/20 transition-all hover:scale-105" asChild>
                             <Link href="/register">
                                 Empieza gratis
                                 <ArrowRight className="ml-2 h-4 w-4" />
                             </Link>
                         </Button>
-                        <Button size="lg" variant="outline" className="text-base px-8" asChild>
+                        <Button size="lg" variant="outline" className="text-base px-8 hover:bg-muted/50 transition-all" asChild>
                             <Link href="/features">Ver funcionalidades</Link>
                         </Button>
                     </motion.div>
@@ -87,19 +87,22 @@ export function Hero() {
 
                 {/* App preview placeholder */}
                 <motion.div
-                    className="mx-auto mt-16 max-w-5xl"
+                    className="mx-auto mt-16 max-w-5xl relative"
                     initial={{ opacity: 0, y: 40 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.7, delay: 0.4 }}
                 >
-                    <div className="relative overflow-hidden rounded-xl border bg-card shadow-2xl shadow-primary/10">
-                        <div className="aspect-[16/9] bg-gradient-to-br from-primary/5 via-background to-accent/5 flex items-center justify-center">
-                            <div className="text-center space-y-4 p-8">
-                                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl nexo-gradient">
+                    {/* Glowing ring behind the card */}
+                    <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary via-accent to-primary opacity-20 blur-xl transition-all duration-1000 group-hover:opacity-40 animate-pulse" />
+                    
+                    <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-card/50 backdrop-blur-xl shadow-2xl shadow-primary/10 ring-1 ring-border/50">
+                        <div className="aspect-[16/9] bg-gradient-to-br from-primary/5 via-background/50 to-accent/5 flex items-center justify-center p-8">
+                            <div className="text-center space-y-6">
+                                <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-2xl nexo-gradient shadow-xl shadow-primary/30 ring-1 ring-white/20">
                                     <Sparkles className="h-10 w-10 text-white" />
                                 </div>
-                                <p className="text-lg font-medium text-muted-foreground">
-                                    Preview de la app — Pipeline Kanban, Chat WhatsApp, KPIs de socios
+                                <p className="text-lg font-medium text-muted-foreground/80 max-w-sm mx-auto">
+                                    Preview interactivo de la app — Pipeline Kanban, Chat WhatsApp, KPIs de socios
                                 </p>
                             </div>
                         </div>

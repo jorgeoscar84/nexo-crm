@@ -3,6 +3,10 @@ import { ThemeToggle } from "@/components/shared/ThemeToggle";
 import { Button } from "@/components/ui/button";
 import { Bell, Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { NewLeadModal } from "@/components/modals/NewLeadModal";
+import { NewEventModal } from "@/components/modals/NewEventModal";
+import { NewPartnerModal } from "@/components/modals/NewPartnerModal";
+import { NewTaskModal } from "@/components/modals/NewTaskModal";
 
 export default function DashboardLayout({
     children,
@@ -34,6 +38,10 @@ export default function DashboardLayout({
                     </div>
                 </header>
                 {/* Content */}
+                <NewLeadModal />
+                <NewEventModal />
+                <NewPartnerModal />
+                <NewTaskModal />
                 <main className="flex-1 overflow-y-auto bg-muted/20 p-6">
                     {children}
                 </main>

@@ -25,6 +25,10 @@ interface CrmState {
     setNewLeadModalOpen: (isOpen: boolean) => void;
     isNewTaskModalOpen: boolean;
     setNewTaskModalOpen: (isOpen: boolean) => void;
+    isNewEventModalOpen: boolean;
+    setNewEventModalOpen: (isOpen: boolean) => void;
+    isNewPartnerModalOpen: boolean;
+    setNewPartnerModalOpen: (isOpen: boolean) => void;
 }
 
 export const useCrmStore = create<CrmState>((set) => ({
@@ -42,4 +46,10 @@ export const useCrmStore = create<CrmState>((set) => ({
 
     isNewTaskModalOpen: false,
     setNewTaskModalOpen: (isOpen) => set({ isNewTaskModalOpen: isOpen }),
+
+    isNewEventModalOpen: false,
+    setNewEventModalOpen: (isOpen) => set({ isNewEventModalOpen: isOpen }),
+
+    isNewPartnerModalOpen: false,
+    setNewPartnerModalOpen: (isOpen) => set({ isNewPartnerModalOpen: isOpen }),
 }));

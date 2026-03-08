@@ -41,6 +41,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+import { useCrmStore } from "@/store/useCrmStore";
+import { listLeads, moveLeadStage } from "@/features/leads/lib/leads-service";
+import { useEffect } from "react";
 
 // ─── Types ──────────────────────────────
 type Stage = { id: string; name: string; color: string };
@@ -219,7 +222,10 @@ function KanbanColumn({
 
             {/* Add lead */}
             <div className="p-2 pt-0">
-                <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground">
+                <Button variant="ghost" size="sm" className="w-full text-xs text-muted-foreground" onClick={() => {
+                    const store = useCrmStore.getState();
+                    store.setNewLeadModalOpen(true);
+                }}>
                     <Plus className="mr-1 h-3 w-3" />
                     Agregar lead
                 </Button>
@@ -230,9 +236,57 @@ function KanbanColumn({
 
 // ─── Pipeline Page ──────────────────────
 export default function PipelinePage() {
+    const { setNewLeadModalOpen } = useCrmStore();
     const [search, setSearch] = useState("");
-    const [columns, setColumns] = useState<Record<string, Lead[]>>(demoLeads);
+    const [columns, setColumns] = useState<Record<string, Lead[]>>({
+        new: [],
+        contacted: [],
+        proposal: [],
+        negotiating: [],
+        won: [],
+        lost: []
+    });
     const [activeLead, setActiveLead] = useState<Lead | null>(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const loadLeads = async () => {
+        try {
+            setIsLoading(true);
+            const { leads } = await listLeads({ limit: 100 });
+
+            // Group leads by stage
+            const groupedLeads: Record<string, Lead[]> = {
+                new: [], contacted: [], proposal: [], negotiating: [], won: [], lost: []
+            };
+
+            leads.forEach(doc => {
+                const lead: Lead = {
+                    id: doc.$id,
+                    name: doc.name,
+                    company: doc.company,
+                    source: doc.source,
+                    score: doc.score,
+                };
+                const stageId = doc.stageId || "new";
+                if (groupedLeads[stageId]) {
+                    groupedLeads[stageId].push(lead);
+                } else {
+                    groupedLeads[stageId] = [lead];
+                }
+            });
+            setColumns(groupedLeads);
+        } catch (error) {
+            console.error("Error loading leads:", error);
+            toast.error("No se pudieron cargar los leads");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    // Load data on mount
+    useEffect(() => {
+        loadLeads();
+    }, []);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -307,10 +361,20 @@ export default function PipelinePage() {
             }
         }
 
-        // Show toast on cross-column move
+        // Show toast on cross-column move and update DB
         if (activeCol !== overCol) {
-            const stageName = defaultStages.find((s) => s.id === overCol)?.name || overCol;
-            toast.success(`Lead movido a "${stageName}"`);
+            // Optimistically update local state handled in handleDragOver
+
+            // Persist to Appwrite DB
+            moveLeadStage(active.id as string, overCol).then(() => {
+                const stageName = defaultStages.find((s) => s.id === overCol)?.name || overCol;
+                toast.success(`Lead movido a "${stageName}"`);
+            }).catch(error => {
+                console.error(error);
+                toast.error("Error al mover el lead");
+                // Revert state if needed (optional)
+                loadLeads();
+            });
         }
     };
 
@@ -324,10 +388,15 @@ export default function PipelinePage() {
                         Arrastra leads entre etapas para actualizar su estado
                     </p>
                 </div>
-                <Button>
-                    <Plus className="mr-2 h-4 w-4" />
-                    Nuevo lead
-                </Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={loadLeads} disabled={isLoading}>
+                        Refrescar
+                    </Button>
+                    <Button onClick={() => setNewLeadModalOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />
+                        Nuevo lead
+                    </Button>
+                </div>
             </div>
 
             {/* Search bar */}

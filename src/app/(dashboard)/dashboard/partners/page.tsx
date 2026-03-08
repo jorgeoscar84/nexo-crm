@@ -9,6 +9,11 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
+import { useCrmStore } from "@/store/useCrmStore";
+import { listPartners, type Partner } from "@/features/partners/lib/partners-service";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { RefreshCw } from "lucide-react";
 
 const partnerKpis = [
     { label: "Socios activos", value: "—", icon: Users, color: "text-[oklch(0.457_0.24_277)]", bg: "bg-[oklch(0.457_0.24_277)]/10" },
@@ -18,7 +23,27 @@ const partnerKpis = [
 ];
 
 export default function PartnersPage() {
+    const { setNewPartnerModalOpen } = useCrmStore();
     const [search, setSearch] = useState("");
+    const [partners, setPartners] = useState<Partner[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const loadPartners = async () => {
+        try {
+            setIsLoading(true);
+            const data = await listPartners();
+            setPartners(data.partners);
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al cargar socios");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadPartners();
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -28,8 +53,14 @@ export default function PartnersPage() {
                     <p className="text-sm text-muted-foreground">Gestión de tu red de socios</p>
                 </div>
                 <div className="flex gap-2">
+                    <Button variant="outline" size="sm" onClick={loadPartners} disabled={isLoading}>
+                        <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                        Refrescar
+                    </Button>
                     <Button variant="outline" size="sm"><Download className="mr-2 h-4 w-4" />Exportar KPIs</Button>
-                    <Button size="sm"><Plus className="mr-2 h-4 w-4" />Nuevo socio</Button>
+                    <Button size="sm" onClick={() => setNewPartnerModalOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />Nuevo socio
+                    </Button>
                 </div>
             </div>
 
@@ -77,11 +108,38 @@ export default function PartnersPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            <TableRow>
-                                <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
-                                    Los socios aparecerán aquí una vez conectado con Appwrite
-                                </TableCell>
-                            </TableRow>
+                            {isLoading ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
+                                        Cargando socios...
+                                    </TableCell>
+                                </TableRow>
+                            ) : partners.length === 0 ? (
+                                <TableRow>
+                                    <TableCell colSpan={8} className="h-32 text-center text-muted-foreground">
+                                        No se encontraron socios. Crea el primero para expandir tu red.
+                                    </TableCell>
+                                </TableRow>
+                            ) : (
+                                partners.map((partner) => (
+                                    <TableRow key={partner.$id}>
+                                        <TableCell className="font-medium">{partner.name}</TableCell>
+                                        <TableCell>Nivel {partner.level}</TableCell>
+                                        <TableCell>—</TableCell>
+                                        <TableCell>{partner.salesCount}</TableCell>
+                                        <TableCell>—</TableCell>
+                                        <TableCell>
+                                            <Badge variant={partner.status === 'active' ? 'secondary' : 'outline'}>
+                                                {partner.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>{partner.commissionRate}%</TableCell>
+                                        <TableCell>
+                                            <Button variant="ghost" size="sm">Ver</Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            )}
                         </TableBody>
                     </Table>
                 </CardContent>

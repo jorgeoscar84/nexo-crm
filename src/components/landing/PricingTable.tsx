@@ -27,13 +27,13 @@ export function PricingTable() {
                     <span className="text-sm font-semibold text-primary uppercase tracking-wider">
                         Planes y precios
                     </span>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+                    <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight sm:text-4xl">
                         Un plan para cada{" "}
                         <span className="nexo-gradient bg-clip-text text-transparent">
                             etapa de tu negocio
                         </span>
                     </h2>
-                    <p className="mt-4 text-lg text-muted-foreground">
+                    <p className="mt-4 text-balance text-lg text-muted-foreground">
                         Sin costos ocultos. Paga solo por lo que necesitas.
                     </p>
 
@@ -77,17 +77,25 @@ export function PricingTable() {
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
+                            className="relative group/card"
                         >
+                            {plan.popular && (
+                                <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary via-accent to-primary opacity-30 blur-lg transition-all duration-1000 group-hover/card:opacity-60 animate-pulse" />
+                            )}
                             <Card
                                 className={cn(
-                                    "relative h-full transition-all duration-300 hover:shadow-lg",
+                                    "relative h-full transition-all duration-500 hover:shadow-xl bg-card",
                                     plan.popular &&
-                                    "border-primary shadow-lg shadow-primary/10 scale-[1.02]"
+                                    "border-primary/50 shadow-2xl shadow-primary/20 scale-[1.03] hover:scale-[1.05]"
                                 )}
                             >
                                 {plan.popular && (
-                                    <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                                        <span className="inline-flex rounded-full nexo-gradient px-4 py-1 text-xs font-semibold text-white shadow-md">
+                                    <div className="absolute -top-4 left-1/2 -translate-x-1/2">
+                                        <span className="inline-flex items-center gap-1 rounded-full nexo-gradient px-4 py-1.5 text-xs font-bold text-white shadow-xl shadow-primary/30 ring-2 ring-white/20">
+                                            <span className="relative flex h-2 w-2">
+                                                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+                                                <span className="relative inline-flex rounded-full h-2 w-2 bg-white"></span>
+                                            </span>
                                             Más popular
                                         </span>
                                     </div>
@@ -113,7 +121,12 @@ export function PricingTable() {
 
                                 <CardContent className="space-y-4">
                                     <Button
-                                        className="w-full"
+                                        className={cn(
+                                            "w-full transition-all duration-300",
+                                            plan.popular
+                                                ? "shadow-lg shadow-primary/20 hover:scale-105"
+                                                : "hover:bg-muted/50"
+                                        )}
                                         variant={plan.popular ? "default" : "outline"}
                                         asChild
                                     >

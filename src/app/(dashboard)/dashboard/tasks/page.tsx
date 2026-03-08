@@ -10,6 +10,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
     Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from "@/components/ui/select";
+import { useCrmStore } from "@/store/useCrmStore";
+import { listTasks, type Task } from "@/features/tasks/lib/tasks-service";
+import { useEffect } from "react";
+import { toast } from "sonner";
+import { RefreshCw, ClipboardList } from "lucide-react";
 
 const statusIcons = {
     pending: <Circle className="h-4 w-4 text-muted-foreground" />,
@@ -19,7 +24,27 @@ const statusIcons = {
 };
 
 export default function TasksPage() {
+    const { setNewTaskModalOpen } = useCrmStore();
     const [search, setSearch] = useState("");
+    const [tasks, setTasks] = useState<Task[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const loadTasks = async () => {
+        try {
+            setIsLoading(true);
+            const data = await listTasks();
+            setTasks(data.tasks);
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al cargar tareas");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadTasks();
+    }, []);
 
     return (
         <div className="space-y-6">
@@ -61,13 +86,58 @@ export default function TasksPage() {
                         </CardContent>
                     </Card>
 
-                    <Card>
-                        <CardContent className="p-6 text-center text-muted-foreground">
-                            <ClipboardIcon className="mx-auto h-10 w-10 mb-3 text-muted-foreground/50" />
-                            <p className="text-sm font-medium">No hay tareas todavía</p>
-                            <p className="text-xs mt-1">Crea tu primera tarea con el botón superior</p>
-                        </CardContent>
-                    </Card>
+                    <div className="space-y-3">
+                        {isLoading ? (
+                            <Card>
+                                <CardContent className="p-6 text-center text-muted-foreground">
+                                    Cargando tareas...
+                                </CardContent>
+                            </Card>
+                        ) : tasks.length === 0 ? (
+                            <Card>
+                                <CardContent className="p-6 text-center text-muted-foreground">
+                                    <ClipboardList className="mx-auto h-10 w-10 mb-3 text-muted-foreground/50" />
+                                    <p className="text-sm font-medium">No hay tareas todavía</p>
+                                    <p className="text-xs mt-1">Crea tu primera tarea con el botón superior</p>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            tasks.map((task) => (
+                                <Card key={task.$id} className="hover:bg-muted/30 transition-colors">
+                                    <CardContent className="p-4 flex items-center justify-between">
+                                        <div className="flex items-center gap-3">
+                                            {task.status === 'completed' ? (
+                                                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                                            ) : (
+                                                <Circle className="h-5 w-5 text-muted-foreground" />
+                                            )}
+                                            <div>
+                                                <p className={`font-medium ${task.status === 'completed' ? 'line-through text-muted-foreground' : ''}`}>
+                                                    {task.title}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">{task.description}</p>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Badge variant={
+                                                task.priority === 'urgent' ? 'destructive' :
+                                                    task.priority === 'high' ? 'secondary' :
+                                                        'outline'
+                                            }>
+                                                {task.priority}
+                                            </Badge>
+                                            {task.dueDate && (
+                                                <div className="flex items-center text-xs text-muted-foreground">
+                                                    <Clock className="mr-1 h-3 w-3" />
+                                                    {new Date(task.dueDate).toLocaleDateString()}
+                                                </div>
+                                            )}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
+                    </div>
                 </TabsContent>
             </Tabs>
         </div>

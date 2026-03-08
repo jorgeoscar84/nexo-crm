@@ -1,9 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Plus, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ChevronLeft, ChevronRight, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useCrmStore } from "@/store/useCrmStore";
+import { listEvents, type CalendarEvent } from "@/features/calendar/lib/calendar-service";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 const days = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 const months = [
@@ -21,9 +25,29 @@ function getFirstDayOfMonth(year: number, month: number) {
 }
 
 export default function CalendarPage() {
+    const { setNewEventModalOpen } = useCrmStore();
     const today = new Date();
     const [currentMonth, setCurrentMonth] = useState(today.getMonth());
     const [currentYear, setCurrentYear] = useState(today.getFullYear());
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const loadEvents = async () => {
+        try {
+            setIsLoading(true);
+            const data = await listEvents();
+            setEvents(data.events);
+        } catch (error) {
+            console.error(error);
+            toast.error("Error al cargar eventos");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        loadEvents();
+    }, []);
 
     const daysInMonth = getDaysInMonth(currentYear, currentMonth);
     const firstDay = getFirstDayOfMonth(currentYear, currentMonth);
@@ -51,7 +75,14 @@ export default function CalendarPage() {
                     <h1 className="text-2xl font-bold">Calendario</h1>
                     <p className="text-sm text-muted-foreground">Eventos, reuniones y seguimientos</p>
                 </div>
-                <Button><Plus className="mr-2 h-4 w-4" />Nuevo evento</Button>
+                <div className="flex gap-2">
+                    <Button variant="outline" onClick={loadEvents} disabled={isLoading}>
+                        <RefreshCw className={`h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                    </Button>
+                    <Button onClick={() => setNewEventModalOpen(true)}>
+                        <Plus className="mr-2 h-4 w-4" />Nuevo evento
+                    </Button>
+                </div>
             </div>
 
             <Card>
@@ -88,6 +119,27 @@ export default function CalendarPage() {
                                         }`}>
                                         {day}
                                     </span>
+                                )}
+                                {day && (
+                                    <div className="mt-1 space-y-1 overflow-y-auto max-h-[50px]">
+                                        {events
+                                            .filter(event => {
+                                                const d = new Date(event.startDate);
+                                                return d.getDate() === day &&
+                                                    d.getMonth() === currentMonth &&
+                                                    d.getFullYear() === currentYear;
+                                            })
+                                            .map(event => (
+                                                <div
+                                                    key={event.$id}
+                                                    className="px-1 py-0.5 text-[10px] rounded truncate bg-primary/10 text-primary border-l-2 border-primary"
+                                                    title={event.title}
+                                                >
+                                                    {event.title}
+                                                </div>
+                                            ))
+                                        }
+                                    </div>
                                 )}
                             </div>
                         ))}

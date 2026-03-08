@@ -48,7 +48,7 @@ export function HowItWorks() {
                     <span className="text-sm font-semibold text-primary uppercase tracking-wider">
                         Cómo funciona
                     </span>
-                    <h2 className="mt-3 text-3xl font-bold tracking-tight sm:text-4xl">
+                    <h2 className="mt-3 text-balance text-3xl font-bold tracking-tight sm:text-4xl">
                         De lead a cliente en{" "}
                         <span className="nexo-gradient bg-clip-text text-transparent">
                             4 pasos
@@ -60,7 +60,7 @@ export function HowItWorks() {
                     {steps.map((step, index) => (
                         <motion.div
                             key={step.number}
-                            className="relative text-center"
+                            className="relative text-center group"
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             viewport={{ once: true }}
@@ -68,19 +68,21 @@ export function HowItWorks() {
                         >
                             {/* Connector line */}
                             {index < steps.length - 1 && (
-                                <div className="absolute left-1/2 top-10 hidden w-full border-t-2 border-dashed border-primary/20 lg:block" />
+                                <div className="absolute left-[60%] top-10 hidden w-[80%] border-t-2 border-dashed border-primary/20 lg:block transition-colors group-hover:border-primary/40" />
                             )}
 
-                            <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-2xl nexo-gradient shadow-lg shadow-primary/20">
+                            <div className="relative mx-auto flex h-20 w-20 items-center justify-center rounded-2xl nexo-gradient shadow-lg shadow-primary/20 transition-transform duration-300 group-hover:scale-110 group-hover:shadow-primary/40">
                                 <step.icon className="h-9 w-9 text-white" />
-                                <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background text-xs font-bold text-primary ring-2 ring-primary">
+                                <span className="absolute -right-2 -top-2 flex h-7 w-7 items-center justify-center rounded-full bg-background text-xs font-bold text-primary ring-2 ring-primary shadow-sm">
                                     {step.number}
                                 </span>
                             </div>
-                            <h3 className="mt-5 text-lg font-semibold">{step.title}</h3>
-                            <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
-                                {step.description}
-                            </p>
+                            <div className="mt-6 rounded-xl p-4 transition-colors duration-300 hover:bg-white/50 dark:hover:bg-white/5">
+                                <h3 className="text-lg font-semibold">{step.title}</h3>
+                                <p className="mt-2 text-balance text-sm text-muted-foreground leading-relaxed">
+                                    {step.description}
+                                </p>
+                            </div>
                         </motion.div>
                     ))}
                 </div>
