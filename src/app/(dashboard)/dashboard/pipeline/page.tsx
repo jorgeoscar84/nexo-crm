@@ -58,27 +58,6 @@ const defaultStages: Stage[] = [
     { id: "lost", name: "Perdido ✗", color: "#ef4444" },
 ];
 
-// Demo leads for testing drag & drop
-const demoLeads: Record<string, Lead[]> = {
-    new: [
-        { id: "l1", name: "María García", company: "TechCorp", source: "WhatsApp", score: 85 },
-        { id: "l2", name: "Carlos López", company: "DataPro", source: "Referido", score: 70 },
-        { id: "l3", name: "Ana Martínez", source: "Sitio web", score: 60 },
-    ],
-    contacted: [
-        { id: "l4", name: "Pedro Sánchez", company: "CloudInc", source: "WhatsApp", score: 75 },
-        { id: "l5", name: "Laura Díaz", source: "Import", score: 55 },
-    ],
-    proposal: [
-        { id: "l6", name: "Roberto Ruiz", company: "SoftMax", source: "Referido", score: 90 },
-    ],
-    negotiating: [
-        { id: "l7", name: "Diana Flores", company: "NetGroup", source: "WhatsApp", score: 95 },
-    ],
-    won: [],
-    lost: [],
-};
-
 // ─── Sortable Lead Card ─────────────────
 function SortableLeadCard({ lead }: { lead: Lead }) {
     const {
@@ -247,6 +226,7 @@ export default function PipelinePage() {
         lost: []
     });
     const [activeLead, setActiveLead] = useState<Lead | null>(null);
+    const [startStageId, setStartStageId] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
 
     const loadLeads = async () => {
@@ -310,6 +290,10 @@ export default function PipelinePage() {
         const { active } = event;
         const lead = active.data.current?.lead as Lead | undefined;
         if (lead) setActiveLead(lead);
+
+        const sourceCol = findColumn(active.id as string);
+        setStartStageId(sourceCol || null);
+        console.log("PipelinePage: drag start", active.id, "from", sourceCol);
     };
 
     const handleDragOver = (event: DragOverEvent) => {
@@ -341,39 +325,42 @@ export default function PipelinePage() {
         const { active, over } = event;
         setActiveLead(null);
 
+        const sourceStage = startStageId;
+        setStartStageId(null);
+
         if (!over) return;
 
-        const activeCol = findColumn(active.id as string);
         const overCol = findColumn(over.id as string) || (over.id as string);
 
-        if (!activeCol || !overCol) return;
+        console.log("PipelinePage: drag end", active.id, "overCol:", overCol, "sourceStage:", sourceStage);
 
-        if (activeCol === overCol) {
-            // Reorder within same column
-            const items = [...columns[activeCol]];
+        // Reorder within same column (if it didn't change columns during drag)
+        const currentCol = findColumn(active.id as string);
+        if (sourceStage === overCol && currentCol === overCol) {
+            const items = [...columns[overCol]];
             const oldIndex = items.findIndex((l) => l.id === active.id);
             const newIndex = items.findIndex((l) => l.id === over.id);
             if (oldIndex !== newIndex && newIndex >= 0) {
                 setColumns((prev) => ({
                     ...prev,
-                    [activeCol]: arrayMove(items, oldIndex, newIndex),
+                    [overCol]: arrayMove(items, oldIndex, newIndex),
                 }));
             }
         }
 
-        // Show toast on cross-column move and update DB
-        if (activeCol !== overCol) {
-            // Optimistically update local state handled in handleDragOver
+        // Persist to DB if the column changed
+        if (sourceStage && overCol && sourceStage !== overCol) {
+            console.log("PipelinePage: PERSISTING move for lead", active.id, "to stage", overCol);
 
-            // Persist to Appwrite DB
+            // Optimistically it's already moved in handleDragOver
             moveLeadStage(active.id as string, overCol).then(() => {
                 const stageName = defaultStages.find((s) => s.id === overCol)?.name || overCol;
                 toast.success(`Lead movido a "${stageName}"`);
+                console.log("PipelinePage: move persisted successfully");
             }).catch(error => {
-                console.error(error);
+                console.error("PipelinePage: move failed", error);
                 toast.error("Error al mover el lead");
-                // Revert state if needed (optional)
-                loadLeads();
+                loadLeads(); // Revert state from DB
             });
         }
     };
@@ -392,7 +379,10 @@ export default function PipelinePage() {
                     <Button variant="outline" onClick={loadLeads} disabled={isLoading}>
                         Refrescar
                     </Button>
-                    <Button onClick={() => setNewLeadModalOpen(true)}>
+                    <Button onClick={() => {
+                        console.log("PipelinePage: opening new lead modal");
+                        setNewLeadModalOpen(true);
+                    }}>
                         <Plus className="mr-2 h-4 w-4" />
                         Nuevo lead
                     </Button>

@@ -1,0 +1,73 @@
+
+> nexo-crm@0.1.0 build
+> next build
+
+Ôû▓ Next.js 16.1.6 (Turbopack)
+
+  Creating an optimized production build ...
+Ô£ô Compiled successfully in 12.5s
+  Running TypeScript ...
+  Collecting page data using 15 workers ...
+  Generating static pages using 15 workers (0/39) ...
+NewLeadModal: rendering, isOpen: false
+  Generating static pages using 15 workers (9/39) 
+NewLeadModal: rendering, isOpen: false
+  Generating static pages using 15 workers (19/39) 
+NewLeadModal: rendering, isOpen: false
+NewLeadModal: rendering, isOpen: false
+NewLeadModal: rendering, isOpen: false
+NewLeadModal: rendering, isOpen: false
+NewLeadModal: rendering, isOpen: false
+NewLeadModal: rendering, isOpen: false
+NewLeadModal: rendering, isOpen: false
+  Generating static pages using 15 workers (29/39) 
+NewLeadModal: rendering, isOpen: false
+NewLeadModal: rendering, isOpen: false
+Ô£ô Generating static pages using 15 workers (39/39) in 1438.8ms
+  Finalizing page optimization ...
+
+Route (app)
+Ôöî Ôùï /
+Ôö£ Ôùï /_not-found
+Ôö£ Ôùï /admin
+Ôö£ Ôùï /admin/coupons
+Ôö£ Ôùï /admin/fields
+Ôö£ Ôùï /admin/logs
+Ôö£ Ôùï /admin/permissions
+Ôö£ Ôùï /admin/pipeline
+Ôö£ Ôùï /admin/templates
+Ôö£ Ôùï /admin/users
+Ôö£ ãÆ /api/auth/logout
+Ôö£ ãÆ /api/auth/oauth/callback
+Ôö£ ãÆ /api/billing/validate-coupon
+Ôö£ ãÆ /api/integrations/calendar/sync
+Ôö£ ãÆ /api/webhooks/mercadopago
+Ôö£ ãÆ /api/webhooks/paypal
+Ôö£ ãÆ /api/webhooks/whatsapp
+Ôö£ Ôùï /checkout
+Ôö£ Ôùï /checkout/success
+Ôö£ Ôùï /dashboard
+Ôö£ Ôùï /dashboard/calendar
+Ôö£ Ôùï /dashboard/contacts
+Ôö£ Ôùï /dashboard/leads
+Ôö£ Ôùï /dashboard/partners
+Ôö£ Ôùï /dashboard/pipeline
+Ôö£ Ôùï /dashboard/postsale
+Ôö£ Ôùï /dashboard/reports
+Ôö£ Ôùï /dashboard/settings
+Ôö£ Ôùï /dashboard/tasks
+Ôö£ Ôùï /dashboard/whatsapp
+Ôö£ Ôùï /features
+Ôö£ Ôùï /forgot-password
+Ôö£ Ôùï /login
+Ôö£ Ôùï /pricing
+Ôö£ Ôùï /register
+Ôö£ Ôùï /reset-password
+Ôöö Ôùï /verify-email
+
+
+ãÆ Proxy (Middleware)
+
+Ôùï  (Static)   prerendered as static content
+ãÆ  (Dynamic)  server-rendered on demand
+

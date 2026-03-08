@@ -12,7 +12,8 @@ import {
 import {
     Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from "@/components/ui/table";
-DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+import {
+    DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useEffect } from "react";
 import { useCrmStore } from "@/store/useCrmStore";

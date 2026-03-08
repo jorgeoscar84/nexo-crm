@@ -27,6 +27,8 @@ export function NewLeadModal() {
     const { isNewLeadModalOpen, setNewLeadModalOpen } = useCrmStore();
     const [isLoading, setIsLoading] = useState(false);
 
+    console.log("NewLeadModal: rendering, isOpen:", isNewLeadModalOpen);
+
     const [formData, setFormData] = useState({
         name: "",
         company: "",
